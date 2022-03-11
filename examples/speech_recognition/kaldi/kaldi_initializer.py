@@ -15,7 +15,7 @@ import os.path as osp
 from pathlib import Path
 import subprocess
 from typing import Optional
-
+from subprocess import PIPE
 from fairseq.data.dictionary import Dictionary
 from fairseq.dataclass import FairseqDataclass
 
@@ -114,14 +114,16 @@ def create_lexicon(
         res = subprocess.run(
             [lex_disambig_path, lexicon_file, disambig_lexicon_file],
             check=True,
-            capture_output=True,
+            stdout=PIPE
+            #capture_output=True,
         )
         ndisambig = int(res.stdout)
         disamib_path = Path(cfg.kaldi_root) / "egs/wsj/s5/utils/add_disambig.pl"
         res = subprocess.run(
             [disamib_path, "--include-zero", in_units_file, str(ndisambig)],
             check=True,
-            capture_output=True,
+            stdout=PIPE
+            #capture_output=True,
         )
         with open(disambig_in_units_file, "wb") as f:
             f.write(res.stdout)
@@ -188,7 +190,10 @@ def create_L(
         try:
             with open(lexicon_graph, "wb") as out_f:
                 res = subprocess.run(
-                    [make_lex, lexicon_file], capture_output=True, check=True
+                    [make_lex, lexicon_file], 
+                    #capture_output=True, 
+                    stdout=PIPE, stderr=PIPE,
+                    check=True
                 )
                 assert len(res.stderr) == 0, res.stderr.decode("utf-8")
                 res = subprocess.run(
@@ -200,19 +205,23 @@ def create_L(
                         "--keep_osymbols=false",
                     ],
                     input=res.stdout,
-                    capture_output=True,
+                   # capture_output=True,
+                    stdout=PIPE, stderr=PIPE
                 )
                 assert len(res.stderr) == 0, res.stderr.decode("utf-8")
                 res = subprocess.run(
                     [fstaddselfloops, in_disambig_sym, out_disambig_sym],
                     input=res.stdout,
-                    capture_output=True,
+                    stdout=PIPE,
+                    #capture_output=True,
                     check=True,
                 )
                 res = subprocess.run(
                     [fstarcsort, "--sort_type=olabel"],
                     input=res.stdout,
-                    capture_output=True,
+                    stdout=PIPE,
+                    #capture_output=True,
+                    
                     check=True,
                 )
                 out_f.write(res.stdout)
@@ -249,8 +258,9 @@ def create_LG(
             with open(lg_graph, "wb") as out_f:
                 res = subprocess.run(
                     [fsttablecompose, lexicon_graph, grammar_graph],
-                    capture_output=True,
+                    #capture_output=True,
                     check=True,
+                    stdout=PIPE,
                 )
                 res = subprocess.run(
                     [
@@ -258,25 +268,29 @@ def create_LG(
                         "--use-log=true",
                     ],
                     input=res.stdout,
-                    capture_output=True,
+                    stdout=PIPE,
+                    #capture_output=True,
                 )
                 res = subprocess.run(
                     [fstminimizeencoded],
                     input=res.stdout,
-                    capture_output=True,
+                    stdout=PIPE,
+                    #capture_output=True,
                     check=True,
                 )
                 res = subprocess.run(
                     [fstpushspecial],
                     input=res.stdout,
-                    capture_output=True,
+                    stdout=PIPE,
+                    #capture_output=True,
                     check=True,
                 )
                 res = subprocess.run(
                     [fstarcsort, "--sort_type=ilabel"],
                     input=res.stdout,
-                    capture_output=True,
+                    #capture_output=True,
                     check=True,
+                    stdout=PIPE,
                 )
                 out_f.write(res.stdout)
         except subprocess.CalledProcessError as e:
@@ -400,8 +414,9 @@ def create_H(
                         "--keep_osymbols=false",
                     ],
                     input=str.encode(fst_str),
-                    capture_output=True,
+                    #capture_output=True,
                     check=True,
+                    stdout=PIPE,
                 )
                 res = subprocess.run(
                     [
@@ -410,14 +425,16 @@ def create_H(
                         disambig_out_units_file_int,
                     ],
                     input=res.stdout,
-                    capture_output=True,
+                    #capture_output=True,
+                    stdout=PIPE,
                     check=True,
                 )
                 res = subprocess.run(
                     [fstarcsort, "--sort_type=olabel"],
                     input=res.stdout,
-                    capture_output=True,
-                    check=True,
+                    #capture_output=True,
+                    stdout=PIPE,
+                    check=True
                 )
                 out_f.write(res.stdout)
         except subprocess.CalledProcessError as e:
@@ -454,31 +471,36 @@ def create_HLGa(
                         h_graph,
                         lg_graph,
                     ],
-                    capture_output=True,
+                    #capture_output=True,
+                    stdout=PIPE,
                     check=True,
                 )
                 res = subprocess.run(
                     [fstdeterminizestar, "--use-log=true"],
                     input=res.stdout,
-                    capture_output=True,
+                    #capture_output=True,
+                    stdout=PIPE,
                     check=True,
                 )
                 res = subprocess.run(
                     [fstrmsymbols, disambig_in_words_file_int],
                     input=res.stdout,
-                    capture_output=True,
+                    #capture_output=True,
+                    stdout=PIPE,
                     check=True,
                 )
                 res = subprocess.run(
                     [fstrmepslocal],
                     input=res.stdout,
-                    capture_output=True,
+                    #capture_output=True,
+                    stdout=PIPE,
                     check=True,
                 )
                 res = subprocess.run(
                     [fstminimizeencoded],
                     input=res.stdout,
-                    capture_output=True,
+                    #capture_output=True,
+                    stdout=PIPE,
                     check=True,
                 )
                 out_f.write(res.stdout)
@@ -517,31 +539,36 @@ def create_HLa(
                         h_graph,
                         l_graph,
                     ],
-                    capture_output=True,
+                    #capture_output=True,
+                    stdout=PIPE,
                     check=True,
                 )
                 res = subprocess.run(
                     [fstdeterminizestar, "--use-log=true"],
                     input=res.stdout,
-                    capture_output=True,
+                    #capture_output=True,
+                    stdout=PIPE,
                     check=True,
                 )
                 res = subprocess.run(
                     [fstrmsymbols, disambig_in_words_file_int],
                     input=res.stdout,
-                    capture_output=True,
+                    #capture_output=True,
+                    stdout=PIPE,
                     check=True,
                 )
                 res = subprocess.run(
                     [fstrmepslocal],
                     input=res.stdout,
-                    capture_output=True,
+                    #capture_output=True,
+                    stdout=PIPE,
                     check=True,
                 )
                 res = subprocess.run(
                     [fstminimizeencoded],
                     input=res.stdout,
-                    capture_output=True,
+                    #capture_output=True,
+                    stdout=PIPE,
                     check=True,
                 )
                 out_f.write(res.stdout)
@@ -590,7 +617,7 @@ def create_HLG(
                 )
 
             my_env = os.environ.copy()
-            my_env["LD_LIBRARY_PATH"] = f"{kaldi_lib}:{my_env['LD_LIBRARY_PATH']}"
+            my_env["LD_LIBRARY_PATH"] = f"{kaldi_lib}"#:{my_env['LD_LIBRARY_PATH']}"
 
             subprocess.run(
                 [
@@ -599,7 +626,8 @@ def create_HLG(
                     hlg_graph,
                 ],
                 check=True,
-                capture_output=True,
+                #capture_output=True,
+                stdout=PIPE,
                 env=my_env,
             )
         except subprocess.CalledProcessError as e:
