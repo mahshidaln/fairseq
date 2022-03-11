@@ -74,6 +74,10 @@ class UnpairedAudioTextConfig(FairseqDataclass):
             "help": "comma-separated words to be removed for LM score computation"
         },
     )
+    dict_path: Optional[str] = field(
+        default=None,
+        metadata={"help": "where the dict is"},
+    )
     kenlm_path: Optional[str] = None
     vocab_usage_power: float = 2
 
@@ -97,7 +101,7 @@ class UnpairedAudioText(FairseqTask):
     ):
         super().__init__(cfg)
 
-        self._target_dictionary = target_dictionary
+        self._target_dictionary = target_dictionary #phone dict from text + end and star and pad and unk
         self._source_dictionary = source_dictionary
         self.num_symbols = (
             len([s for s in target_dictionary.symbols if not s.startswith("madeup")])
@@ -156,7 +160,11 @@ class UnpairedAudioText(FairseqTask):
             target_dictionary = Dictionary.load(dict_path)
         else:
             dict_path = os.path.join(cfg.data, f"dict.{cfg.labels}.txt")
-            target_dictionary = Dictionary.load(dict_path)
+            if os.path.exists(dict_path):
+                target_dictionary = Dictionary.load(dict_path)
+            else:
+                dict_path = os.path.join(cfg.dict_path, f"dict.{cfg.labels}.txt")
+                target_dictionary = Dictionary.load(dict_path)
 
         return cls(cfg, target_dictionary=target_dictionary)
 
@@ -309,14 +317,14 @@ class UnpairedAudioText(FairseqTask):
             text_dataset = data_utils.load_indexed_dataset(
                 os.path.join(self.cfg.text_data, split), self.target_dictionary
             )
-            text_dataset = StripTokenDataset(text_dataset, self.target_dictionary.eos())
+            text_dataset = StripTokenDataset(text_dataset, self.target_dictionary.eos()) #remove </s>
             self.datasets[split] = RandomInputDataset(
                 self.datasets[split],
                 text_dataset,
                 ["random_label"],
                 add_to_input=True,
                 pad_idx=self.target_dictionary.pad(),
-            )
+            ) # combines audio set and text! what is it doing with <pad>?
 
     @property
     def source_dictionary(self):
