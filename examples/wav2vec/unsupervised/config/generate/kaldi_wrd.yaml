@@ -8,21 +8,26 @@ fairseq:
     sort_by_length: false
     shuffle: false
     text_data: ''
-
+  common:
+    user_dir: ''
   common_eval:
     path: ''
     quiet: true
 
   dataset:
-    gen_subset: valid
+    gen_subset: trans
     batch_size: 1
 
-w2l_decoder: VITERBI
+w2l_decoder: KALDI
 post_process: silence
 
 unit_lm: false
-targets: phn
+targets: wrd
 blank_weight: 0
 sil_is_blank: true
 blank_mode: set
 unsupervised_tuning: false
+
+kaldi_decoder_config:
+  hlg_graph_path: '' 
+  output_dict: ''
