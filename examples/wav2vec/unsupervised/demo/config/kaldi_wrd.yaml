@@ -1,0 +1,34 @@
+# @package _group_
+
+fairseq:
+  task:
+    _name: unpaired_audio_text
+    labels: phn
+    data: '' # set vy the code 
+    dict_path: /h/malinoori/unsup/fairseq/examples/wav2vec/unsupervised/demo/data
+    sort_by_length: false
+    shuffle: false
+    text_data: ''
+  common:
+    user_dir: /h/malinoori/unsup/fairseq/examples/wav2vec/unsupervised
+  common_eval:
+    path: /h/malinoori/unsup/fairseq/examples/wav2vec/unsupervised/multirun/2022-02-22/22-36-38/0/checkpoint_last.pt
+    quiet: true
+
+  dataset:
+    gen_subset: trans
+    batch_size: 1
+
+w2l_decoder: KALDI
+post_process: silence
+
+unit_lm: false
+targets: wrd
+blank_weight: 0
+sil_is_blank: true
+blank_mode: set
+unsupervised_tuning: false
+
+kaldi_decoder_config:
+  hlg_graph_path: /scratch/gobi3/malinoori/unsup/text-lm-10/fst/phn_to_words_sil/HLG.phn.kenlm.wrd.o40003.fst 
+  output_dict: /scratch/gobi3/malinoori/unsup/text-lm-10/fst/phn_to_words_sil/kaldi_dict.kenlm.wrd.o40003.txt

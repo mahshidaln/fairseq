@@ -1,0 +1,7 @@
+wav2vec_model: /scratch/gobi3/malinoori/unsup/wav2vec_vox_new.pt
+layer: 14
+cluster_model: /scratch/gobi3/malinoori/unsup/audio100/CLUS128
+pca_model: /scratch/gobi3/malinoori/unsup/audio100/pca
+pca_batch: 100
+pooling: mean
+device: cuda

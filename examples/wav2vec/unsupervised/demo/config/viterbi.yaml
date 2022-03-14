@@ -1,0 +1,30 @@
+# @package _group_
+
+fairseq:
+  task:
+    _name: unpaired_audio_text
+    labels: phn
+    #data: to sen in the code
+    sort_by_length: false
+    shuffle: false
+    text_data: ''
+  common:
+    user_dir: ${FAIRSEQ_ROOT}/examples/wav2vec/unsupervised
+  common_eval:
+    path: /h/malinoori/unsup/fairseq/examples/wav2vec/unsupervised/multirun/2022-02-22/22-36-38/0/checkpoint_last.pt
+    quiet: true
+
+  dataset:
+    gen_subset: trans
+    batch_size: 1
+
+w2l_decoder: VITERBI
+post_process: silence
+
+unit_lm: false
+targets: phn
+blank_weight: 0
+sil_is_blank: true
+blank_mode: set
+unsupervised_tuning: false
+
