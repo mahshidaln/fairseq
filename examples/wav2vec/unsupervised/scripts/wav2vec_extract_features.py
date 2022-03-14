@@ -40,7 +40,8 @@ class Wav2VecFeatureReader(object):
         )
         model = model[0]
         model.eval()
-        model.cuda()
+        if torch.cuda.is_available():
+            model.cuda()
         self.model = model
         self.task = task
         self.layer = layer
@@ -55,7 +56,9 @@ class Wav2VecFeatureReader(object):
     def get_feats(self, loc):
         x = self.read_audio(loc)
         with torch.no_grad():
-            source = torch.from_numpy(x).float().cuda()
+            source = torch.from_numpy(x).float()
+            if torch.cuda.is_available():
+                source = source.cuda()
             if self.task.cfg.normalize:
                 assert source.dim() == 1, source.dim()
                 with torch.no_grad():
