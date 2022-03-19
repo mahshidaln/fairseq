@@ -14,7 +14,7 @@ fairseq:
     quiet: true
 
   dataset:
-    gen_subset: trans
+    gen_subset: test
     batch_size: 1
 
 w2l_decoder: KALDI # 
